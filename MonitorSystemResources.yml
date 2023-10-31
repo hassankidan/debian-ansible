@@ -3,5 +3,10 @@
   hosts: debian_hosts
   become: yes
   tasks:
+    - name: Install sysstat package
+      apt:
+        name: sysstat
+        state: present
+
     - name: Monitor CPU usage
       command: mpstat 1 1
