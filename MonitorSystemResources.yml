@@ -1,0 +1,9 @@
+---
+- name: Monitor resources on Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Monitor CPU usage
+      command: top -b -n 1 | grep "Cpu(s)" 
+
+    # Add more tasks for monitoring resources
