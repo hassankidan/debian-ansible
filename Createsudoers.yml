@@ -13,10 +13,17 @@
         name: master
         password: "{{ 'Aa12356' | password_hash('sha512') }}"
         state: present
+        groups: sudo
+        append: yes
 
-    - name: Add 'master' user to sudoers
-      lineinfile:
-        dest: /etc/sudoers
-        line: 'master ALL=(ALL) NOPASSWD:ALL'
-        state: present
+    - name: Ensure sudoers.d directory exists
+      file:
+        path: /etc/sudoers.d
+        state: directory
+
+    - name: Add 'master' user to sudoers.d
+      copy:
+        dest: /etc/sudoers.d/master
+        content: 'master ALL=(ALL) NOPASSWD:ALL'
+        mode: '0440'
         validate: 'visudo -cf %s'
