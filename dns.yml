@@ -8,20 +8,22 @@
         name: network-manager
         state: present
 
+    - name: Get NetworkManager connection names
+      command: nmcli -t -f NAME con show --active
+      register: nmcli_connections
+      changed_when: false
+
     - name: Set primary DNS server using nmcli
       command: nmcli con mod "{{ item }}" ipv4.dns "10.10.80.21"
-      with_items: "{{ ansible_interfaces }}"
-      when: item != "lo" # excluding the loopback interface
-
+      with_items: "{{ nmcli_connections.stdout_lines }}"
+    
     - name: Add secondary DNS server using nmcli
       command: nmcli con mod "{{ item }}" +ipv4.dns "10.10.80.22"
-      with_items: "{{ ansible_interfaces }}"
-      when: item != "lo"
+      with_items: "{{ nmcli_connections.stdout_lines }}"
 
     - name: Add tertiary DNS server using nmcli
       command: nmcli con mod "{{ item }}" +ipv4.dns "8.8.8.8"
-      with_items: "{{ ansible_interfaces }}"
-      when: item != "lo"
+      with_items: "{{ nmcli_connections.stdout_lines }}"
 
     - name: Restart NetworkManager to apply DNS changes
       service:
