@@ -1,0 +1,9 @@
+---
+- name: Install a package on Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Install package
+      apt:
+        name: <package_name>
+        state: present
