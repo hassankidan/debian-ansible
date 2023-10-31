@@ -13,6 +13,7 @@
         name: master
         state: absent
 
-    - name: Revert package upgrade (Optional: you might want to keep your packages updated)
-      apt:
-        upgrade: 'no'
+    # The following task is optional. It doesn't actually revert package updates but serves as a placeholder.
+    - name: "Revert package upgrade (Optional)"
+      debug:
+        msg: "Consider if you really want to revert package updates. This is just a placeholder task."
