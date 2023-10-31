@@ -1,0 +1,9 @@
+---
+- name: Create a directory on Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Create directory
+      file:
+        path: /path/to/directory
+        state: directory
