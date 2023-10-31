@@ -13,10 +13,14 @@
       register: nmcli_connections
       changed_when: false
 
+    - name: Clear existing DNS servers
+      command: nmcli con mod "{{ item }}" ipv4.dns ""
+      with_items: "{{ nmcli_connections.stdout_lines }}"
+
     - name: Set primary DNS server using nmcli
       command: nmcli con mod "{{ item }}" ipv4.dns "10.10.80.21"
       with_items: "{{ nmcli_connections.stdout_lines }}"
-    
+
     - name: Add secondary DNS server using nmcli
       command: nmcli con mod "{{ item }}" +ipv4.dns "10.10.80.22"
       with_items: "{{ nmcli_connections.stdout_lines }}"
