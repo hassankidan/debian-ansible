@@ -1,0 +1,9 @@
+---
+- name: Copy files to Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Copy files
+      copy:
+        src: /path/to/source
+        dest: /path/to/destination
