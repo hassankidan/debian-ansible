@@ -1,0 +1,7 @@
+---
+- name: Execute command on Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Execute command
+      command: <command_to_execute>
