@@ -1,0 +1,9 @@
+---
+- name: Create a new user on Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Create user
+      user:
+        name: <username>
+        state: present
