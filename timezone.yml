@@ -1,0 +1,13 @@
+---
+- name: Update and set timezone for all Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Update apt cache and upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Set timezone to Israel
+      timezone:
+        name: Asia/Jerusalem
