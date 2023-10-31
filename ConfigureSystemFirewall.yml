@@ -1,0 +1,11 @@
+---
+- name: Configure firewall on Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Allow specific port
+      ufw:
+        rule: allow
+        port: <port_number>
+
+    # Add more tasks for configuring firewall
