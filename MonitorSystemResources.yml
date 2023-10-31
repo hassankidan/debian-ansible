@@ -4,6 +4,4 @@
   become: yes
   tasks:
     - name: Monitor CPU usage
-      command: top -b -n 1 | grep "Cpu(s)" 
-
-    # Add more tasks for monitoring resources
+      command: sar -u 1 1 | grep "Average"
