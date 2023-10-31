@@ -1,0 +1,9 @@
+---
+- name: Remove a package from Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Remove package
+      apt:
+        name: <package_name>
+        state: absent
