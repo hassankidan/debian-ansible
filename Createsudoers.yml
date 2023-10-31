@@ -1,29 +1,18 @@
 ---
-- name: Create user and add to sudoers on Debian servers
+- name: Remove user 'master' and its related changes on Debian servers
   hosts: debian_hosts
   become: yes
   tasks:
-    - name: Update apt cache and upgrade packages
-      apt:
-        update_cache: yes
-        upgrade: yes
+    - name: Remove 'master' from sudoers.d
+      file:
+        path: /etc/sudoers.d/master
+        state: absent
 
-    - name: Ensure user 'master' exists and set password
+    - name: Remove user 'master'
       user:
         name: master
-        password: "{{ 'Aa12356' | password_hash('sha512') }}"
-        state: present
-        groups: sudo
-        append: yes
+        state: absent
 
-    - name: Ensure sudoers.d directory exists
-      file:
-        path: /etc/sudoers.d
-        state: directory
-
-    - name: Add 'master' user to sudoers.d
-      copy:
-        dest: /etc/sudoers.d/master
-        content: 'master ALL=(ALL) NOPASSWD:ALL'
-        mode: '0440'
-        validate: 'visudo -cf %s'
+    - name: Revert package upgrade (Optional: you might want to keep your packages updated)
+      apt:
+        upgrade: 'no'
