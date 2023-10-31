@@ -1,0 +1,22 @@
+---
+- name: Create user and add to sudoers on Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Update apt cache and upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Ensure user 'master' exists and set password
+      user:
+        name: master
+        password: "{{ 'Aa12356' | password_hash('sha512') }}"
+        state: present
+
+    - name: Add 'master' user to sudoers
+      lineinfile:
+        dest: /etc/sudoers
+        line: 'master ALL=(ALL) NOPASSWD:ALL'
+        state: present
+        validate: 'visudo -cf %s'
