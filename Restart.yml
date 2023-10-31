@@ -1,0 +1,7 @@
+---
+- name: Restart Debian servers
+  hosts: debian_hosts
+  become: yes
+  tasks:
+    - name: Restart server
+      command: systemctl restart
