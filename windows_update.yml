@@ -1,0 +1,15 @@
+---
+- name: Run Windows Update
+  hosts: windows
+  tasks:
+    - name: Install all available Windows updates
+      win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+        reboot: yes
+      register: update_result
+
+    - name: Reboot the server if required
+      win_reboot:
+      when: update_result.reboot_required
