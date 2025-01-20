@@ -1,8 +1,6 @@
 ---
-- name: Restart netbox-redis-1 container
+- name: Restart NetBox Docker Container
   hosts: localhost
-  become: true
   tasks:
-    - name: Restart netbox-redis-1 Docker container
-      ansible.builtin.shell:
-        cmd: docker restart netbox-redis-1
+    - name: Restart NetBox container
+      command: docker restart netbox-netbox-1
