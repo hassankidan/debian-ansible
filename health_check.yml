@@ -4,12 +4,10 @@
   tasks:
     - name: Run health check on Netbox container
       shell: |
-        docker inspect netbox-netbox-1 --format='{{json .State.Health}}'
+        docker inspect netbox-netbox-1 --format="{{ '{{.State.Health}}' }}"
       register: health_check_output
 
     - name: Save health check output to file
       copy:
         content: "{{ health_check_output.stdout }}"
         dest: /root/netbox/health/netbox_health_{{ ansible_date_time.date }}.txt
-      vars:
-        ansible_date_time: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
