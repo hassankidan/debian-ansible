@@ -2,6 +2,12 @@
 - name: Perform health check for Netbox container
   hosts: localhost
   tasks:
+    - name: Create the health directory if it does not exist
+      file:
+        path: /root/netbox/health
+        state: directory
+        mode: '0755'
+
     - name: Run health check on Netbox container
       shell: |
         docker inspect netbox-netbox-1 --format="{{ '{{.State.Health}}' }}"
