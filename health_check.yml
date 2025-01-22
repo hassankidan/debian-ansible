@@ -1,32 +1,44 @@
 ---
-- name: Perform health check for Netbox container
+- name: Fetch NetBox container health logs
   hosts: localhost
   tasks:
-    - name: Create the health directory if it does not exist
+    - name: Ensure the health directory exists
       file:
         path: /root/netbox/health
         state: directory
         mode: '0755'
 
-    - name: Run health check on Netbox container
+    - name: Run health check on NetBox container
       shell: |
         docker inspect netbox-netbox-1 --format="{{ '{{json .State.Health}}' }}"
       register: health_check_output
+      failed_when: health_check_output.rc != 0
 
     - name: Parse health check output
       set_fact:
         health_parsed: "{{ health_check_output.stdout | from_json }}"
+      when: health_check_output.stdout != ""
 
-    - name: Extract and save health status
+    - name: Extract and clean health check logs
+      set_fact:
+        cleaned_logs: >
+          {% for log in health_parsed.Log %}
+          - Start: {{ log.Start }}
+            End: {{ log.End }}
+            Exit Code: {{ log.ExitCode }}
+            Output: {{ log.Output | regex_replace('<[^>]*>', '') | regex_replace('\\s+', ' ') }}
+          {% endfor %}
+      when: health_parsed is defined and health_parsed.Log | length > 0
+
+    - name: Save health logs to a file
       copy:
         content: |
-          Health Status: {{ health_parsed.Status }}
-          Failing Streak: {{ health_parsed.FailingStreak }}
+          Health Check Report - NetBox
+          ========================================
+          Health Status: {{ health_parsed.Status | default('Unknown') }}
+          Failing Streak: {{ health_parsed.FailingStreak | default('Unknown') }}
           Logs:
-          {% for log in health_parsed.Log %}
-            - Start: {{ log.Start }}
-              End: {{ log.End }}
-              Exit Code: {{ log.ExitCode }}
-              Output: {{ log.Output | regex_replace('\\s+', ' ') }}
-          {% endfor %}
+          {{ cleaned_logs | default('No logs available') }}
         dest: /root/netbox/health/netbox_health_{{ ansible_date_time.date }}.txt
+      delegate_to: localhost
+      when: health_parsed is defined
