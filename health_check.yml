@@ -13,7 +13,20 @@
         docker inspect netbox-netbox-1 --format="{{ '{{json .State.Health}}' }}"
       register: health_check_output
 
-    - name: Save health check output to file
+    - name: Parse health check output
+      set_fact:
+        health_parsed: "{{ health_check_output.stdout | from_json }}"
+
+    - name: Extract and save health status
       copy:
-        content: "{{ health_check_output.stdout | to_nice_json }}"
+        content: |
+          Health Status: {{ health_parsed.Status }}
+          Failing Streak: {{ health_parsed.FailingStreak }}
+          Logs:
+          {% for log in health_parsed.Log %}
+            - Start: {{ log.Start }}
+              End: {{ log.End }}
+              Exit Code: {{ log.ExitCode }}
+              Output: {{ log.Output | regex_replace('\\s+', ' ') }}
+          {% endfor %}
         dest: /root/netbox/health/netbox_health_{{ ansible_date_time.date }}.txt
