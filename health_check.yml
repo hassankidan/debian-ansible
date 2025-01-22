@@ -1,14 +1,14 @@
 ---
-- name: Perform health check for Netbox container
+- name: Fetch NetBox container health logs
   hosts: localhost
   tasks:
-    - name: Create the health directory if it does not exist
+    - name: Ensure the health directory exists
       file:
         path: /root/netbox/health
         state: directory
         mode: '0755'
 
-    - name: Run health check on Netbox container
+    - name: Run health check on NetBox container
       shell: |
         docker inspect netbox-netbox-1 --format="{{ '{{json .State.Health}}' }}"
       register: health_check_output
@@ -17,16 +17,24 @@
       set_fact:
         health_parsed: "{{ health_check_output.stdout | from_json }}"
 
-    - name: Extract and save health status
+    - name: Extract and clean health check logs
+      set_fact:
+        cleaned_logs: >
+          {% for log in health_parsed.Log %}
+          - Start: {{ log.Start }}
+            End: {{ log.End }}
+            Exit Code: {{ log.ExitCode }}
+            Output: {{ log.Output | regex_replace('<[^>]*>', '') | regex_replace('\\s+', ' ') }}
+          {% endfor %}
+
+    - name: Save health logs to a file
       copy:
         content: |
+          Health Check Report - NetBox
+          ========================================
           Health Status: {{ health_parsed.Status }}
           Failing Streak: {{ health_parsed.FailingStreak }}
           Logs:
-          {% for log in health_parsed.Log %}
-            - Start: {{ log.Start }}
-              End: {{ log.End }}
-              Exit Code: {{ log.ExitCode }}
-              Output: {{ log.Output | regex_replace('\\s+', ' ') }}
-          {% endfor %}
+          {{ cleaned_logs }}
         dest: /root/netbox/health/netbox_health_{{ ansible_date_time.date }}.txt
+      delegate_to: localhost
